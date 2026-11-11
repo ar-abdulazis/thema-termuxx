@@ -1,0 +1,16 @@
+# 1. Pastikan paket git & tar sudah terinstal
+pkg update && pkg upgrade -y
+pkg install git tar -y
+
+# 2. Beri izin akses penyimpanan internal
+termux-setup-storage
+
+# 3. Unduh (clone) repositori thema-termuxx Anda
+git clone https://github.com/ar-abdulazis/thema-termuxx.git ~/thema-termuxx
+
+# 4. Ekstrak file arsip tema Cybersmith langsung ke folder Home (~/)
+tar -xzf ~/thema-termuxx/cybersmith-dotfiles.tar.gz -C ~
+
+# 5. Terapkan pengaturan Termux & jalankan sesi baru
+termux-reload-settings
+exec zsh
