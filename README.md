@@ -26,7 +26,7 @@ Anda dapat memasang seluruh konfigurasi ini secara instan menggunakan **metode o
 Cukup salin dan jalankan perintah berikut di terminal Termux Anda:
 
 ```bash
-bash -c "$(curl -fsSL [https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/install.sh](https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/install.sh))"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/install.sh)"
 ```
 *Skrip di atas akan secara otomatis memperbarui sistem, memasang dependensi (`git`, `curl`, `zsh`, `python`, `tar`), mengonfigurasi Oh My Zsh dan plugin, mencadangkan file lama, hingga mengekstrak tema Cybersmith.*
 
