@@ -13,10 +13,25 @@ echo -e "${MAG}╔════════════════════�
 echo -e "${CYAN}   ⚡ INSTALLER THEMA-TERMUXx (CYBERSMITH EDITION) ⚡   ${NC}"
 echo -e "${MAG}╚══════════════════════════════════════════════════════╝${NC}"
 
-# 1. Update & Instal Paket Dasar
-echo -e "\n${YEL}[1/6] Memperbarui sistem & menginstal paket dasar...${NC}"
+# 1. Update & Pengecekan Paket Dasar + UI Tools (fzf & gum)
+echo -e "\n${YEL}[1/6] Memeriksa paket dasar & komponen UI (fzf, gum)...${NC}"
 pkg update -y && pkg upgrade -y
-pkg install -y git curl zsh nano python tar
+
+PACKAGES=(git curl zsh nano python tar fzf gum termux-api)
+MISSING_PKGS=()
+
+for pkg_name in "${PACKAGES[@]}"; do
+  if ! command -v "$pkg_name" &> /dev/null && ! dpkg -s "$pkg_name" &> /dev/null; then
+    MISSING_PKGS+=("$pkg_name")
+  fi
+done
+
+if [ ${#MISSING_PKGS[@]} -gt 0 ]; then
+  echo -e "${YEL}      Menginstal paket yang belum tersedia: ${MISSING_PKGS[*]}...${NC}"
+  pkg install -y "${MISSING_PKGS[@]}"
+else
+  echo -e "${GRN}[✔] Semua paket dasar, fzf, dan gum sudah terpasang! Lanjut...${NC}"
+fi
 
 # 2. Setup Izin Storage
 if [ ! -d "$HOME/storage" ]; then
@@ -41,10 +56,14 @@ ZSH_CUSTOM=${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}
 echo -e "\n${YEL}[4/6] Memasang plugin Zsh...${NC}"
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
   git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+else
+  echo -e "${GRN}      Plugin zsh-autosuggestions sudah terpasang.${NC}"
 fi
 
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
   git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+else
+  echo -e "${GRN}      Plugin zsh-syntax-highlighting sudah terpasang.${NC}"
 fi
 
 # 5. Unduh Konfigurasi Terbaru Langsung dari Repositori GitHub
@@ -52,7 +71,6 @@ echo -e "\n${YEL}[5/6] Mengunduh konfigurasi terbaru Cybersmith...${NC}"
 [ -f "$HOME/.zshrc" ] && cp "$HOME/.zshrc" "$HOME/.zshrc.bak_$(date +%Y%m%d)"
 mkdir -p "$HOME/.termux"
 
-# Mengambil file lepas langsung (tidak bergantung pada arsip .tar.gz)
 curl -fsSL "$REPO_RAW/.zshrc" -o "$HOME/.zshrc"
 curl -fsSL "$REPO_RAW/colors.properties" -o "$HOME/.termux/colors.properties"
 curl -fsSL "$REPO_RAW/termux.properties" -o "$HOME/.termux/termux.properties"
