@@ -140,6 +140,9 @@ alias gc='git commit -m'
 alias gp='git push'
 alias gl='git log --oneline --graph --all'
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+# --- Shortcut Manajemen Thema-Termuxx ---
+alias update-thema='bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/update.sh)"'
+alias reset-thema='bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/uninstall.sh)"'
 
 
 # ==========================================
