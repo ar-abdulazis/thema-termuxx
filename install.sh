@@ -8,10 +8,37 @@ RED='\033[1;31m'
 NC='\033[0m'
 
 REPO_RAW="https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main"
+BAK_FILE="$HOME/.zshrc.cybersmith.bak"
 
 echo -e "${MAG}╔══════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}   ⚡ INSTALLER THEMA-TERMUXx (CYBERSMITH EDITION) ⚡   ${NC}"
 echo -e "${MAG}╚══════════════════════════════════════════════════════╝${NC}"
+
+# 0. Cek apakah ada file cadangan lokal (.zshrc.cybersmith.bak)
+if [ -f "$BAK_FILE" ]; then
+  echo -e "\n${YEL}[!] Ditemukan file cadangan lokal: ~/.zshrc.cybersmith.bak${NC}"
+  echo -e "  ${GRN}[y]${NC} Pulihkan langsung dari cadangan lokal (Cepat & Hemat Kuota Internet)."
+  echo -e "  ${CYAN}[n]${NC} Abaikan cadangan & lakukan instalasi bersih terbaru dari GitHub."
+  read -p "Gunakan file cadangan lokal untuk memulihkan tema? (y/n): " use_bak
+
+  if [[ "$use_bak" == "y" || "$use_bak" == "Y" ]]; then
+    echo -e "\n${GRN}[+] Memulihkan konfigurasi dari penyimpanan lokal...${NC}"
+    mv "$BAK_FILE" "$HOME/.zshrc"
+    mkdir -p "$HOME/.termux"
+    
+    # Pulihkan properti dasar jika terhapus saat reset
+    [ ! -f "$HOME/.termux/colors.properties" ] && curl -fsSL "$REPO_RAW/colors.properties" -o "$HOME/.termux/colors.properties"
+    [ ! -f "$HOME/.termux/termux.properties" ] && curl -fsSL "$REPO_RAW/termux.properties" -o "$HOME/.termux/termux.properties"
+    [ ! -f "$HOME/.termux/font.ttf" ] && curl -fsSL "$REPO_RAW/font.ttf" -o "$HOME/.termux/font.ttf"
+
+    chsh -s zsh
+    termux-reload-settings
+    echo -e "${GRN}[✔] Pemulihan selesai! Memulai ulang ke Zsh...${NC}\n"
+    exec zsh
+  else
+    echo -e "${CYAN}[!] Melanjutkan dengan instalasi bersih dari GitHub...${NC}"
+  fi
+fi
 
 # 1. Update & Pengecekan Paket Dasar + UI Tools (fzf & gum)
 echo -e "\n${YEL}[1/6] Memeriksa paket dasar & komponen UI (fzf, gum)...${NC}"

@@ -7,40 +7,53 @@ RED='\033[1;31m'
 NC='\033[0m'
 
 echo -e "${YEL}╔══════════════════════════════════════════════════════╗${NC}"
-echo -e "${RED}   ⚠️  RESET TAMPILAN TERMUX KE SETELAN AWAL  ⚠️      ${NC}"
+echo -e "${RED}   ⚠️  RESET TAMPILAN TERMUX KE SETELAN AWAL  ⚠️       ${NC}"
 echo -e "${YEL}╚══════════════════════════════════════════════════════╝${NC}"
 
-# Konfirmasi keamanan sebelum menghapus
+# Konfirmasi keamanan sebelum reset
 read -p "Yakin ingin menghapus tema Cybersmith & kembali ke default? (y/n): " confirm
 if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   echo -e "${CYAN}[!] Proses reset dibatalkan.${NC}"
   exit 0
 fi
 
-# 1. Backup konfigurasi saat ini sebelum dihapus (untuk berjaga-jaga)
-echo -e "\n${YEL}[1/4] Mencadangkan konfigurasi lama ke ~/.zshrc.cybersmith.bak...${NC}"
-[ -f "$HOME/.zshrc" ] && mv "$HOME/.zshrc" "$HOME/.zshrc.cybersmith.bak"
+# Opsi Penanganan File Cadangan (.zshrc.cybersmith.bak)
+echo -e "\n${CYAN}--- Opsi Pencadangan Konfigurasi ---${NC}"
+echo -e "  ${GRN}[y]${NC} Simpan cadangan (~/.zshrc.cybersmith.bak) -> Bisa dipulihkan instan nanti tanpa internet."
+echo -e "  ${RED}[n]${NC} Hapus permanen -> Bersihkan seluruh konfigurasi Cybersmith dari perangkat."
+read -p "Simpan file cadangan konfigurasi saat ini? (y/n): " keep_bak
 
-# 2. Hapus skema warna, font, dan properti kustom di folder .termux
+if [ -f "$HOME/.zshrc" ]; then
+  if [[ "$keep_bak" == "y" || "$keep_bak" == "Y" ]]; then
+    echo -e "\n${GRN}[1/4] Menyimpan cadangan konfigurasi ke ~/.zshrc.cybersmith.bak...${NC}"
+    mv "$HOME/.zshrc" "$HOME/.zshrc.cybersmith.bak"
+  else
+    echo -e "\n${RED}[1/4] Menghapus permanen file ~/.zshrc dan cadangan lama...${NC}"
+    rm -f "$HOME/.zshrc" "$HOME/.zshrc.cybersmith.bak"
+  fi
+fi
+
+# Hapus skema warna, font, dan properti kustom di folder .termux
 echo -e "${YEL}[2/4] Menghapus warna, font, & properti kustom...${NC}"
 rm -f "$HOME/.termux/colors.properties"
 rm -f "$HOME/.termux/font.ttf"
 rm -f "$HOME/.termux/termux.properties"
 
-# 3. Kembalikan pesan sambutan (MOTD) bawaan Termux
+# Kembalikan pesan sambutan (MOTD) bawaan Termux
 echo -e "${YEL}[3/4] Mengembalikan welcome screen bawaan Termux...${NC}"
 rm -f "$HOME/.hushlogin"
 
-# 4. Kembalikan shell default dari Zsh ke Bash bawaan Termux
+# Kembalikan shell default dari Zsh ke Bash bawaan Termux
 echo -e "${YEL}[4/4] Mengembalikan default shell ke Bash...${NC}"
 chsh -s bash
 
-# Terapkan perubahan visual Termux
 termux-reload-settings
 
 echo -e "\n${GRN}╔══════════════════════════════════════════════════════╗${NC}"
 echo -e "${GRN}║  [✔] TERMUX BERHASIL DIKEMBALIKAN KE SETELAN AWAL!   ║${NC}"
 echo -e "${GRN}╚══════════════════════════════════════════════════════╝${NC}"
-echo -e "${CYAN}Memulai ulang sesi ke Bash standar...${NC}\n"
+if [[ "$keep_bak" == "y" || "$keep_bak" == "Y" ]]; then
+  echo -e "${CYAN}Info: Ketik 'restore-thema' (atau jalankan install.sh) untuk memulihkan kembali.${NC}\n"
+fi
 
 exec bash

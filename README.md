@@ -2,21 +2,22 @@
 
 # ⚡ thema-termuxx ASCII: Cybersmith
 
-_Konfigurasi Zsh & Header Cyberpunk Kustom untuk Termux Android yang Ringan, Stabil, dan Presisi._
+_Konfigurasi Zsh & Header Cyberpunk Kustom untuk Termux Android yang Ringan, Interaktif, dan Presisi._
 
 </div>
-<img src="CyberSmith.png" alt="alt text" width="300">
+<img src="CyberSmith.png" alt="Cybersmith Banner" width="300">
 
 ---
 
 ## 1. 🚪 Pintu Gerbang Informasi
 
-Selamat datang di repositori **`thema-termuxx`**! Project ini lahir dari eksperimen untuk menghadirkan antarmuka terminal Android (_Termux_) yang estetis dengan skema warna _Neon Cyberpunk_, namun tetap mengedepankan efisiensi kerja, keterbacaan data sistem _real-time_, serta stabilitas navigasi harian.
+Selamat datang di repositori **`thema-termuxx`**! Project ini lahir dari eksperimen untuk menghadirkan antarmuka terminal Android (_Termux_) yang estetis dengan skema warna _Neon Cyberpunk_, namun tetap mengedepankan efisiensi kerja, keterbacaan data sistem _real-time_, manajemen tema interaktif, serta stabilitas navigasi harian.
 
 ### Spesifikasi Utama:
 
 - **Shell Framework:** Zsh + Oh My Zsh
-- **Tema Visual:** Cybersmith Cyberfunk (Cyan `#05d9e8`, Magenta `#ff2a6d`, Cyber Gold `#ffb000`)
+- **Interactive UI Engine:** `fzf` & `gum` (Menu pemilihan tema & animasi _startup_)
+- **Tema Default:** Cybersmith Cyberfunk (Cyan `#05d9e8`, Magenta `#ff2a6d`, Cyber Gold `#ffb000`)
 - **Sasaran Perangkat:** Termux di Android (Optimal pada mode Portrait & Landscape)
 
 ---
@@ -30,18 +31,19 @@ Anda dapat memasang seluruh konfigurasi ini secara instan menggunakan **metode o
 Cukup salin dan jalankan perintah berikut di terminal Termux Anda:
 
 ```bash
-bash -c "$(curl -fsSL [https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/install.sh](https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/install.sh))"
-
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/install.sh)"
 ```
 
-_Skrip di atas akan secara otomatis memperbarui sistem, memasang dependensi (`git`, `curl`, `zsh`, `python`, `tar`), mengonfigurasi Oh My Zsh dan plugin, mencadangkan file lama, hingga mengunduh konfigurasi tema Cybersmith terbaru._
+````
+
+_Skrip di atas akan secara otomatis memperbarui sistem, mendeteksi dan memasang dependensi (`git`, `curl`, `zsh`, `python`, `tar`, `fzf`, `gum`, `termux-api`), mengonfigurasi Oh My Zsh beserta pluginnya, mencadangkan file lama, hingga mengunduh konfigurasi tema Cybersmith terbaru._
 
 ### Metode Manual (Opsional)
 
 1. Perbarui sistem & instal paket pendukung:
 
 ```bash
-pkg update && pkg upgrade -y && pkg install git curl zsh nano python tar -y
+pkg update && pkg upgrade -y && pkg install git curl zsh nano python tar fzf gum termux-api -y
 
 ```
 
@@ -67,47 +69,49 @@ termux-reload-settings && exec zsh
 
 ## 3. ⚡ Penjelasan Fitur & Pengoperasian
 
-- **Neural Terminal Header v2.6:** Banner ASCII kustom dengan panel statistik _real-time_ (Storage `/data`, Waktu, Tanggal, Versi Python, dan Arsitektur CPU) yang dikunci menggunakan format presisi agar bingkai kanan (`║`) tetap lurus.
+- **Neural Terminal Header v2.6 (Real-Time):** Banner ASCII kustom dengan panel statistik langsung (Storage `/data`, Waktu, Tanggal, Persentase Baterai, Uptime perangkat, Versi Python, dan Arsitektur CPU) yang dikunci menggunakan format presisi agar bingkai kanan (`║`) tetap lurus.
+- **Animated Startup (`gum spin`):** Animasi _loading_ interaktif saat pertama kali membuka sesi terminal baru tanpa membebani proses penyegaran layar berikutnya.
+- **Interactive Theme Switcher (`themes`):** Menu pemilih skema warna interaktif berbasis `gum` dan `fzf` yang memungkinkan pergantian tema secara instan (Cyberfunk, Matrix Green, Amber Terminal, Cyber Blue Deep).
 - **Anti-Clear Header:** Fungsi _override_ pada perintah `clear` dan pintasan `Ctrl + L` memastikan layar kerja bawah bersih tanpa menghapus banner di bagian atas.
-- **Custom Dual-Line Prompt:** Desain prompt dua baris neon cyan-magenta lengkap dengan integrasi status Git (`vcs_info`) secara otomatis.
+- **Safe Reset & Instant Restore:** Mekanisme penghapusan tema yang aman dengan pencadangan otomatis ke `.zshrc.cybersmith.bak`, dilengkapi perintah `restore-thema` untuk memulihkan konfigurasi kapan saja.
 
-### Ringkasan Shortcut (Aliases)
+### Ringkasan Shortcut (Aliases & Fungsi)
 
-| Alias               | Perintah Asli / Fungsi                    | Fungsi Singkat                                        |
-| ------------------- | ----------------------------------------- | ----------------------------------------------------- |
-| `rc` / `zshrc`      | `nano ~/.zshrc`                           | Edit file konfigurasi Zsh                             |
-| `rl` / `reload`     | `source ~/.zshrc`                         | Muat ulang pengaturan terminal                        |
-| `tc` / `termcolors` | `nano ~/.termux/colors.properties`        | Atur properti warna Termux                            |
-| `c`                 | `clear`                                   | Bersihkan layar bawah + cetak ulang header            |
-| `sd`                | `cd /sdcard`                              | Pindah ke penyimpanan internal HP                     |
-| `dl`                | `cd /sdcard/Download`                     | Pindah ke folder Download                             |
-| `up`                | `pkg update && pkg upgrade -y`            | Pembaruan seluruh paket Termux                        |
-| `update-thema`      | `exec bash -c "$(curl ... update.sh)"`    | Perbarui tema secara otomatis ke versi terbaru GitHub |
-| `reset-thema`       | `exec bash -c "$(curl ... uninstall.sh)"` | Hapus tema & kembalikan Termux ke setelan awal        |
-| `backup-termux`     | Fungsi Kustom                             | Arsipkan `.zshrc` & `.termux` ke folder Download      |
-| `restore-termux`    | Fungsi Kustom                             | Pulihkan konfigurasi dari arsip cadangan terbaru      |
+| Perintah / Alias    | Fungsi Asli                               | Keterangan                                                               |
+| ------------------- | ----------------------------------------- | ------------------------------------------------------------------------ |
+| `themes`            | Fungsi Interaktif (`gum`)                 | Buka menu interaktif untuk mengganti skema warna tema                    |
+| `rc` / `zshrc`      | `nano ~/.zshrc`                           | Edit file konfigurasi Zsh                                                |
+| `rl` / `reload`     | `source ~/.zshrc`                         | Muat ulang pengaturan terminal                                           |
+| `tc` / `termcolors` | `nano ~/.termux/colors.properties`        | Atur properti warna Termux secara manual                                 |
+| `c`                 | `clear`                                   | Bersihkan layar bawah + cetak ulang header                               |
+| `sd`                | `cd /sdcard`                              | Pindah ke penyimpanan internal HP                                        |
+| `dl`                | `cd /sdcard/Download`                     | Pindah ke folder Download                                                |
+| `up`                | `pkg update && pkg upgrade -y`            | Pembaruan seluruh paket Termux                                           |
+| `update-thema`      | `exec bash -c "$(curl ... update.sh)"`    | Perbarui tema secara otomatis ke versi terbaru GitHub                    |
+| `reset-thema`       | `exec bash -c "$(curl ... uninstall.sh)"` | Hapus tema & kembalikan Termux ke Bash bawaan                            |
+| `restore-thema`     | Fungsi Pemulihan                          | Kembalikan tema Cybersmith dari cadangan `.zshrc.cybersmith.bak`         |
+| `backup-termux`     | Fungsi Arsip                              | Arsipkan `.zshrc` & `.termux` ke folder `/sdcard/Download/Termux_Backup` |
+| `restore-termux`    | Fungsi Ekstrak Arsip                      | Pulihkan konfigurasi dari arsip cadangan `.tar.gz` terbaru               |
 
 ---
 
 ## 4. 🛠️ Pemecahan Masalah & Kemungkinan Kendala (_Troubleshooting_)
 
-Berikut adalah beberapa kendala yang mungkin terjadi beserta solusi teknisnya:
+- **Status Baterai (`🔋 BATT`) menampilkan `N/A`:**
+- **Penyebab:** Paket `termux-api` belum terinstal atau aplikasi pendamping _Termux:API_ belum terpasang di sistem Android.
+- **Solusi:** Jalankan `pkg install termux-api -y` dan pastikan aplikasi Termux:API terinstal serta memiliki izin baterai.
 
-- **Terminal otomatis membuka `colors.properties` saat dimuat:**
-- **Penyebab:** Terjadi bentrok nama alias `colors` dengan fungsi internal modul warna Zsh.
-- **Solusi:** Pastikan baris pengaman `unalias colors 2>/dev/null` berada di bagian atas file `~/.zshrc`, lalu jalankan perintah `exec zsh`.
+- **Menu `themes` atau animasi tidak muncul:**
+- **Penyebab:** Paket `gum` dan `fzf` belum terpasang pada instalasi versi lama.
+- **Solusi:** Jalankan perintah `themes` sekali agar skrip menginstalnya secara otomatis, atau jalankan `pkg install gum fzf -y`.
 
-- **Bingkai header kanan (`║`) bergeser atau miring:**
-- **Penyebab:** Perubahan panjang string variabel dinamis (seperti sisa kapasitas penyimpanan).
-- **Solusi:** Gunakan penata format lebar tetap `printf` (misalnya `%-16s`) seperti yang sudah diterapkan di dalam fungsi `cybersmith_header()`.
-
-- **Perintah `update-thema` atau `reset-thema` memunculkan error `command not found`:**
-- **Penyebab:** Sesi terminal aktif belum memuat alias terbaru yang ada di `~/.zshrc`.
-- **Solusi:** Ketik `rl` atau `reload` terlebih dahulu untuk memuat ulang konfigurasi, atau pastikan file `.zshrc` di GitHub Anda sudah memuat alias manajemen tema.
+- **Error `parse error` saat memuat `.zshrc` setelah _copy-paste_:**
+- **Penyebab:** Karakter spasi tidak terlihat (_non-breaking space_) ikut tersalin dari peramban web.
+- **Solusi:** Jalankan `update-thema` untuk mengunduh berkas `.zshrc` mentah yang bersih langsung dari repositori GitHub.
 
 - **Setelah menjalankan `reset-thema`, saat mengetik `exit` malah terpental kembali ke tema Cybersmith:**
-- **Penyebab:** Skrip dijalankan di dalam _child process_ Bash sehingga proses Zsh induk masih aktif di memori latar belakang.
-- **Solusi:** Pastikan alias menggunakan awalan `exec` (`exec bash -c "..."`) agar sesi Zsh lama dihancurkan total dan digantikan proses bersih.
+- **Penyebab:** Skrip dijalankan di dalam _child process_ Bash tanpa menutup sesi Zsh induk.
+- **Solusi:** Pastikan alias menggunakan awalan `exec` (`exec bash -c "..."`) agar sesi Zsh lama digantikan total oleh proses Bash bersih.
 
 ---
 
@@ -127,19 +131,12 @@ Project **`thema-termuxx`** bersifat _Open Source_ di bawah semangat berbagi ilm
 ### 👤 Profil Pembuat
 
 > **NAMA** : ar.abdulazis
->
 > **STATUS** : Pembelajar Seumur Hidup & Penggagas Ide
->
 > **MESIN** : Digerakkan Ide, Dibantu AI
->
 > **HAK CIPTA** : Milik Allah Semata, kita mah bukan siapa-siapa.
->
 > _"Bukan ahli, cuma hamba yang sedang menjemput ilmu dan skill agar bermanfaat bagi diri, sesama, dan lingkungan."_
 
 Dibuat dengan ⚡ dan dedikasi penuh di ekosistem Termux Android.
 
 _Terima kasih telah berkunjung, semoga bermanfaat!_
-
-```
-
-```
+````
