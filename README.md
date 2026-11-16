@@ -128,10 +128,10 @@ Project **`thema-termuxx`** bersifat _Open Source_ di bawah semangat berbagi ilm
 
 ### 👤 Profil Pembuat
 
-> **NAMA** : ar.abdulazis
-> **STATUS** : Pembelajar Seumur Hidup & Penggagas Ide
-> **MESIN** : Digerakkan Ide, Dibantu AI
-> **HAK CIPTA** : Milik Allah Semata, kita mah bukan siapa-siapa.
+> **NAMA** : ar.abdulazis <br>
+> **STATUS** : Pembelajar Seumur Hidup & Penggagas Ide <br>
+> **MESIN** : Digerakkan Ide, Dibantu AI <br>
+> **HAK CIPTA** : Milik Allah Semata, kita mah bukan siapa-siapa. <br>
 > _"Bukan ahli, cuma hamba yang sedang menjemput ilmu dan skill agar bermanfaat bagi diri, sesama, dan lingkungan."_
 
 Dibuat dengan ⚡ dan dedikasi penuh di ekosistem Termux Android.
