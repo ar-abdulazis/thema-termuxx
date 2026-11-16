@@ -4,6 +4,7 @@
 *Konfigurasi Zsh & Header Cyberpunk Kustom untuk Termux Android yang Ringan, Stabil, dan Presisi.*
 
 </div>
+<img src="CyberSmith.png" alt="alt text" width="300">
 
 ---
 
