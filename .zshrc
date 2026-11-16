@@ -13,7 +13,6 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-
 # ==========================================
 # 1. CYBERSMITH - OPTIMIZED HEADER BANNER
 # ==========================================
@@ -26,7 +25,6 @@ cybersmith_header() {
   local C_GRAY='\e[1;90m'
   local C_RST='\e[0m'
 
-  # Informasi Sistem (Diringan agar tidak lag saat clear)
   local RT_TIME=$(date '+%H:%M:%S')
   local RT_DATE=$(date '+%d %b %Y')
   local RT_STORAGE=$(df -h /data 2>/dev/null | awk 'NR==2 {print $4 "/" $2}')
@@ -63,7 +61,6 @@ cybersmith_header() {
 # 2. ANIMASI STARTUP & PENGATURAN CLEAR
 # ==========================================
 
-# Jalankan animasi gum spin hanya saat pertama kali terminal dibuka (bukan saat clear biasa)
 if [ -z "$CYBERSMITH_LOADED" ]; then
   export CYBERSMITH_LOADED="1"
   clear
@@ -77,7 +74,6 @@ cybersmith_header
 
 unalias clear 2>/dev/null
 
-# Perintah clear ringan (tidak memicu animasi berulang, hanya cetak ulang header)
 clear() {
   command clear
   cybersmith_header
@@ -89,7 +85,6 @@ cybersmith-clear-widget() {
 }
 zle -N cybersmith-clear-widget
 bindkey '^L' cybersmith-clear-widget
-
 
 # ==========================================
 # 3. PROMPT & GIT VCS INFO
@@ -108,7 +103,6 @@ zstyle ':vcs_info:*' stagedstr '+'
 zstyle ':vcs_info:git:*' formats ' %F{magenta}(git:%b%u%c)%f'
 
 PROMPT=$'%F{cyan}┌─[%f%F{yellow}%*%f%F{cyan}]─[%f%F{green}%~%f%F{cyan}]%f${vcs_info_msg_0_}\n%F{cyan}└─▶%f '
-
 
 # ==========================================
 # 4. CUSTOM ALIASES
@@ -136,16 +130,15 @@ alias gc='git commit -m'
 alias gp='git push'
 alias gl='git log --oneline --graph --all'
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias restore-thema='restore-thema'
 alias update-thema='exec bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/update.sh)"'
 alias reset-thema='exec bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/uninstall.sh)"'
-
 
 # ==========================================
 # 5. INTERACTIVE THEME SELECTOR (FZF & GUM)
 # ==========================================
 
 themes() {
-  # Otomatis instal gum dan fzf jika belum ada
   if ! command -v gum &> /dev/null || ! command -v fzf &> /dev/null; then
     echo -e "\e[1;33m[!] Menginstal 'gum' & 'fzf' untuk menu interaktif...\e[0m"
     pkg install gum fzf -y
@@ -263,7 +256,6 @@ EOF
   exec zsh
 }
 
-
 # ==========================================
 # 6. BACKUP & RESTORE CONFIG
 # ==========================================
@@ -286,7 +278,7 @@ restore-termux() {
   if [ -z "$LATEST_BACKUP" ]; then
     echo -e "\e[1;31m[✘] File backup tidak ditemukan!\e[0m"
     return 1
-  }
+  fi
 
   tar -xzf "$LATEST_BACKUP" -C ~
   termux-reload-settings
@@ -301,4 +293,28 @@ reset-termux() {
   chsh -s bash
   termux-reload-settings
   exec bash
+}
+
+# --- Fitur Pemulihan Tema dari Cadangan Reset ---
+restore-thema() {
+  local BAK_FILE="$HOME/.zshrc.cybersmith.bak"
+  
+  if [ ! -f "$BAK_FILE" ]; then
+    echo -e "\e[1;31m[✘] File cadangan (.zshrc.cybersmith.bak) tidak ditemukan!\e[0m"
+    return 1
+  fi
+
+  echo -e "\e[1;33m[!] Memulihkan konfigurasi tema Cybersmith dari cadangan...\e[0m"
+  
+  # Kembalikan file .zshrc dari cadangan
+  mv "$BAK_FILE" "$HOME/.zshrc"
+  
+  # Ubah default shell kembali ke Zsh
+  chsh -s zsh
+  
+  # Terapkan pengaturan & muat ulang sesi
+  termux-reload-settings
+  echo -e "\e[1;32m[✔] Tema Cybersmith berhasil dipulihkan!\e[0m"
+  sleep 0.8
+  exec zsh
 }
