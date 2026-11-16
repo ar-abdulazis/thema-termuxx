@@ -2,29 +2,23 @@
 # CYBERSMITH - NEURAL TERMINAL v2.6
 # ==========================================
 
-# Path instalasi Oh My Zsh
 export ZSH="$HOME/.oh-my-zsh"
-
-# Kosongkan tema bawaan agar tidak bentrok dengan prompt kustom
 ZSH_THEME=""
 
-# Daftar plugin yang aktif
 plugins=(
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
 )
 
-# Memuat konfigurasi utama Oh My Zsh
 source $ZSH/oh-my-zsh.sh
 
 
 # ==========================================
-# 1. CYBERSMITH - CYBERFUNK HEADER BANNER
+# 1. CYBERSMITH - OPTIMIZED HEADER BANNER
 # ==========================================
 
 cybersmith_header() {
-  # Definisi Warna Neon Cyberpunk
   local C_CYAN='\e[1;36m'
   local C_MAG='\e[1;35m'
   local C_YEL='\e[1;33m'
@@ -32,21 +26,19 @@ cybersmith_header() {
   local C_GRAY='\e[1;90m'
   local C_RST='\e[0m'
 
-  # Informasi Sistem Real-Time & Hardware
+  # Informasi Sistem (Diringan agar tidak lag saat clear)
   local RT_TIME=$(date '+%H:%M:%S')
   local RT_DATE=$(date '+%d %b %Y')
-  local RT_STORAGE=$(df -h /data 2>/dev/null | awk 'NR==2 {print $4 "/" $2 " (" $5 ")"}')
+  local RT_STORAGE=$(df -h /data 2>/dev/null | awk 'NR==2 {print $4 "/" $2}')
   local RT_UPTIME=$(uptime 2>/dev/null | sed 's/.*up \([^,]*\), .*/\1/')
   local RT_PY=$(python --version 2>/dev/null | awk '{print "Py " $2}')
   [ -z "$RT_PY" ] && RT_PY="No Py"
   local RT_ARCH=$(uname -m)
 
-  # Info Baterai & Suhu (Khusus Termux via termux-battery-status)
   local RT_BATTERY="N/A"
   if command -v termux-battery-status &> /dev/null; then
     local b_pct=$(termux-battery-status 2>/dev/null | grep -o '"percentage":[0-9]*' | grep -o '[0-9]*')
-    local b_status=$(termux-battery-status 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
-    [ -n "$b_pct" ] && RT_BATTERY="${b_pct}% (${b_status:-Unknown})"
+    [ -n "$b_pct" ] && RT_BATTERY="${b_pct}%"
   fi
 
   echo -e "${C_MAG}╔════════════════════════════════════════════════════════╗${C_RST}"
@@ -58,34 +50,39 @@ cybersmith_header() {
   echo -e "${C_YEL}     /____/                      // NEURAL TERMINAL v2.6${C_RST}"
   echo -e "${C_MAG}╠════════════════════════════════════════════════════════╣${C_RST}"
   
-  # Menggunakan printf agar garis kanan (║) selalu lurus & simetris
   printf "${C_MAG}║${C_RST} ${C_CYAN}⚡ SYS  :${C_RST} %-16s ${C_CYAN}🕒 TIME  :${C_RST} ${C_YEL}%-15s${C_RST} ${C_MAG}║${C_RST}\n" "Termux" "$RT_TIME"
-  printf "${C_MAG}║${C_RST} ${C_CYAN}💾 DISK :${C_RST} %-16s ${C_CYAN}📅 DATE  :${C_RST} %-15s ${C_MAG}║${C_RST}\n" "$RT_STORAGE" "$RT_DATE"
-  printf "${C_MAG}║${C_RST} ${C_CYAN}🔋 BATT :${C_RST} %-16s ${C_CYAN}⏱️ UPTIME:${C_RST} %-15s ${C_MAG}║${C_RST}\n" "$RT_BATTERY" "$RT_UPTIME"
-  printf "${C_MAG}║${C_RST} ${C_CYAN}🔧 ENV  :${C_RST} ${C_GRN}%-16s${C_RST} ${C_CYAN}📡 NODE  :${C_RST} %-15s ${C_MAG}║${C_RST}\n" "$RT_PY" "$RT_ARCH"
+  printf "${C_MAG}║${C_RST} ${C_CYAN}💾 DISK :${C_RST} %-16s ${C_CYAN}📅 DATE  :${C_RST} ${C_YEL}%-15s${C_RST} ${C_MAG}║${C_RST}\n" "$RT_STORAGE" "$RT_DATE"
+  printf "${C_MAG}║${C_RST} ${C_CYAN}🔋 BATT :${C_RST} %-16s ${C_CYAN}⏱️ UPTIME:${C_RST} ${C_YEL}%-15s${C_RST} ${C_MAG}║${C_RST}\n" "$RT_BATTERY" "$RT_UPTIME"
+  printf "${C_MAG}║${C_RST} ${C_CYAN}🔧 ENV  :${C_RST} ${C_GRN}%-16s${C_RST} ${C_CYAN}📡 NODE  :${C_RST} ${C_YEL}%-15s${C_RST} ${C_MAG}║${C_RST}\n" "$RT_PY" "$RT_ARCH"
   
   echo -e "${C_MAG}╚════════════════════════════════════════════════════════╝${C_RST}"
   echo ""
 }
 
-# Tampilkan banner saat pertama kali terminal dibuka
+# ==========================================
+# 2. ANIMASI STARTUP & PENGATURAN CLEAR
+# ==========================================
+
+# Jalankan animasi gum spin hanya saat pertama kali terminal dibuka (bukan saat clear biasa)
+if [ -z "$CYBERSMITH_LOADED" ]; then
+  export CYBERSMITH_LOADED="1"
+  clear
+  if command -v gum &> /dev/null; then
+    gum spin --spinner.foreground="cyan" --title="Initializing Cybersmith Neural Link..." -- sleep 0.8
+  fi
+fi
+
 command clear
 cybersmith_header
 
-
-# ==========================================
-# 2. ANTI-CLEAR & CTRL+L (BANNER TETAP MUNCUL)
-# ==========================================
-
 unalias clear 2>/dev/null
 
-# Override perintah 'clear' agar banner otomatis digambar ulang di atas
+# Perintah clear ringan (tidak memicu animasi berulang, hanya cetak ulang header)
 clear() {
   command clear
   cybersmith_header
 }
 
-# Override tombol Ctrl+L agar memanggil fungsi clear di atas
 cybersmith-clear-widget() {
   clear
   zle reset-prompt
@@ -99,7 +96,6 @@ bindkey '^L' cybersmith-clear-widget
 # ==========================================
 
 setopt PROMPT_SUBST
-
 autoload -Uz vcs_info
 autoload -Uz add-zsh-hook
 precmd_vcs_info() { vcs_info }
@@ -111,47 +107,35 @@ zstyle ':vcs_info:*' unstagedstr '*'
 zstyle ':vcs_info:*' stagedstr '+'
 zstyle ':vcs_info:git:*' formats ' %F{magenta}(git:%b%u%c)%f'
 
-# Custom Prompt Dua Baris Neon
 PROMPT=$'%F{cyan}┌─[%f%F{yellow}%*%f%F{cyan}]─[%f%F{green}%~%f%F{cyan}]%f${vcs_info_msg_0_}\n%F{cyan}└─▶%f '
 
 
 # ==========================================
-# 4. CYBERSMITH - CUSTOM ALIASES
+# 4. CUSTOM ALIASES
 # ==========================================
 
-# --- Navigasi & Manajemen File ---
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ll='ls -lah --color=auto'
 alias c='clear'
 alias sd='cd /sdcard'
 alias dl='cd /sdcard/Download'
-
-# --- Edit & Muat Ulang Konfigurasi Cepat ---
 alias rc='nano ~/.zshrc'
 alias rl='source ~/.zshrc'
 alias tc='nano ~/.termux/colors.properties'
 alias zshrc='nano ~/.zshrc'
 alias reload='source ~/.zshrc'
 alias termcolors='nano ~/.termux/colors.properties'
-
-# --- Paket & Sistem Termux ---
 alias up='pkg update && pkg upgrade -y'
 alias ins='pkg install'
-
-# --- Coding & Python ---
 alias py='python'
 alias pyhttp='python -m http.server 8080'
-
-# --- Git & Dotfiles Shortcut ---
 alias gs='git status'
 alias ga='git add .'
 alias gc='git commit -m'
 alias gp='git push'
 alias gl='git log --oneline --graph --all'
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-
-# --- Shortcut Manajemen Thema-Termuxx ---
 alias update-thema='exec bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/update.sh)"'
 alias reset-thema='exec bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/uninstall.sh)"'
 
@@ -161,8 +145,9 @@ alias reset-thema='exec bash -c "$(curl -fsSL https://raw.githubusercontent.com/
 # ==========================================
 
 themes() {
-  if ! command -v gum &> /dev/null; then
-    echo -e "\e[1;33m[!] 'gum' belum terpasang. Menginstal otomatis...\e[0m"
+  # Otomatis instal gum dan fzf jika belum ada
+  if ! command -v gum &> /dev/null || ! command -v fzf &> /dev/null; then
+    echo -e "\e[1;33m[!] Menginstal 'gum' & 'fzf' untuk menu interaktif...\e[0m"
     pkg install gum fzf -y
   fi
 
@@ -175,7 +160,6 @@ themes() {
 
   case "$CHOICE" in
     *"Cyberfunk"*)
-      echo -e "\n\e[1;36m[+] Menerapkan Tema Cybersmith Cyberfunk...\e[0m"
       cat << 'EOF' > ~/.termux/colors.properties
 background=#0f0e17
 foreground=#05d9e8
@@ -199,7 +183,6 @@ color15=#ffffff
 EOF
       ;;
     *"Matrix Green"*)
-      echo -e "\n\e[1;32m[+] Menerapkan Tema Matrix Green...\e[0m"
       cat << 'EOF' > ~/.termux/colors.properties
 background=#0d0d0d
 foreground=#00ff66
@@ -223,7 +206,6 @@ color15=#ffffff
 EOF
       ;;
     *"Amber Terminal"*)
-      echo -e "\n\e[1;33m[+] Menerapkan Tema Amber Terminal...\e[0m"
       cat << 'EOF' > ~/.termux/colors.properties
 background=#14120f
 foreground=#ffb000
@@ -247,7 +229,6 @@ color15=#ffffff
 EOF
       ;;
     *"Cyber Blue Deep"*)
-      echo -e "\n\e[1;34m[+] Menerapkan Tema Cyber Blue Deep...\e[0m"
       cat << 'EOF' > ~/.termux/colors.properties
 background=#0b1329
 foreground=#799fff
@@ -271,20 +252,20 @@ color15=#ffffff
 EOF
       ;;
     *)
-      echo "Pemilihan tema dibatalkan."
+      echo "Dibatalkan."
       return
       ;;
   esac
 
   termux-reload-settings
-  echo -e "\n\e[1;32m[✔] Tema berhasil diterapkan! Menyegarkan sesi...\e[0m"
-  sleep 0.8
+  echo -e "\e[1;32m[✔] Tema diterapkan! Menyegarkan sesi...\e[0m"
+  sleep 0.5
   exec zsh
 }
 
 
 # ==========================================
-# 6. CYBERSMITH - BACKUP & RESTORE CONFIG
+# 6. BACKUP & RESTORE CONFIG
 # ==========================================
 
 backup-termux() {
@@ -295,8 +276,7 @@ backup-termux() {
   pkg list-installed > ~/.termux/installed_packages.txt 2>/dev/null
   tar -czf "$BACKUP_DIR/$ARCHIVE_NAME" -C ~ .zshrc .termux .hushlogin 2>/dev/null
 
-  echo -e "\e[1;32m[✔] Backup berhasil disimpan di:\e[0m"
-  echo -e "\e[1;36m     $BACKUP_DIR/$ARCHIVE_NAME\e[0m"
+  echo -e "\e[1;32m[✔] Backup berhasil disimpan di $BACKUP_DIR/$ARCHIVE_NAME\e[0m"
 }
 
 restore-termux() {
@@ -304,23 +284,21 @@ restore-termux() {
   local LATEST_BACKUP=$(ls -t "$BACKUP_DIR"/cybersmith_config_*.tar.gz 2>/dev/null | head -n 1)
 
   if [ -z "$LATEST_BACKUP" ]; then
-    echo -e "\e[1;31m[✘] File backup tidak ditemukan di $BACKUP_DIR\e[0m"
+    echo -e "\e[1;31m[✘] File backup tidak ditemukan!\e[0m"
     return 1
-  fi
+  }
 
-  echo -e "\e[1;33m[!] Memulihkan dari: $LATEST_BACKUP\e[0m"
   tar -xzf "$LATEST_BACKUP" -C ~
   termux-reload-settings
   source ~/.zshrc
-  echo -e "\e[1;32m[✔] Konfigurasi Cybersmith berhasil dipulihkan!\e[0m"
+  echo -e "\e[1;32m[✔] Konfigurasi dipulihkan!\e[0m"
 }
 
 reset-termux() {
-  echo -e "\e[1;33m[!] Mengembalikan Termux ke tampilan awal...\e[0m"
+  echo -e "\e[1;33m[!] Mengembalikan Termux ke setelan awal...\e[0m"
   [ -f "$HOME/.zshrc" ] && mv "$HOME/.zshrc" "$HOME/.zshrc.cybersmith.bak"
   rm -f "$HOME/.termux/colors.properties" "$HOME/.termux/font.ttf" "$HOME/.termux/termux.properties" "$HOME/.hushlogin"
   chsh -s bash
   termux-reload-settings
-  echo -e "\e[1;32m[✔] Tampilan Termux telah direset ke setelan awal.\e[0m"
   exec bash
 }
