@@ -130,7 +130,6 @@ alias gc='git commit -m'
 alias gp='git push'
 alias gl='git log --oneline --graph --all'
 alias dotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-alias restore-thema='restore-thema'
 alias update-thema='exec bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/update.sh)"'
 alias reset-thema='exec bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/uninstall.sh)"'
 
@@ -260,6 +259,8 @@ EOF
 # 6. BACKUP & RESTORE CONFIG
 # ==========================================
 
+unalias backup-termux restore-termux restore-thema reset-termux 2>/dev/null
+
 backup-termux() {
   local BACKUP_DIR="/sdcard/Download/Termux_Backup"
   local ARCHIVE_NAME="cybersmith_config_$(date +%Y%m%d_%H%M%S).tar.gz"
@@ -282,13 +283,47 @@ restore-termux() {
 
   tar -xzf "$LATEST_BACKUP" -C ~
   termux-reload-settings
-  source ~/.zshrc
-  echo -e "\e[1;32m[✔] Konfigurasi dipulihkan!\e[0m"
+  exec zsh
+}
+
+restore-thema() {
+  local BAK_FILE="$HOME/.zshrc.cybersmith.bak"
+
+  if [ ! -f "$BAK_FILE" ]; then
+    echo -e "\e[1;31m[✘] File cadangan (.zshrc.cybersmith.bak) tidak ditemukan!\e[0m"
+    return 1
+  fi
+
+  echo -e "\e[1;33m[!] Memulihkan konfigurasi tema Cybersmith dari cadangan lokal...\e[0m"
+  mv "$BAK_FILE" "$HOME/.zshrc"
+  [ -f "$HOME/.bashrc" ] && sed -i '/alias restore-thema=/d' "$HOME/.bashrc"
+  chsh -s zsh
+  termux-reload-settings
+  echo -e "\e[1;32m[✔] Tema Cybersmith berhasil dipulihkan!\e[0m"
+  sleep 0.5
+  exec zsh
 }
 
 reset-termux() {
-  echo -e "\e[1;33m[!] Mengembalikan Termux ke setelan awal...\e[0m"
-  [ -f "$HOME/.zshrc" ] && mv "$HOME/.zshrc" "$HOME/.zshrc.cybersmith.bak"
+  local ALIAS_CMD="alias restore-thema='[ -f ~/.zshrc.cybersmith.bak ] && mv ~/.zshrc.cybersmith.bak ~/.zshrc && sed -i \"/alias restore-thema=/d\" ~/.bashrc && chsh -s zsh && exec zsh || echo \"Cadangan tidak ditemukan!\"'"
+
+  echo -e "\e[1;33m[!] Mengembalikan Termux ke setelan awal (Offline Reset)...\e[0m"
+  read "keep_bak?Simpan cadangan ~/.zshrc.cybersmith.bak agar bisa di-restore nanti? (y/n): "
+
+  if [ -f "$HOME/.zshrc" ]; then
+    if [[ "$keep_bak" == "y" || "$keep_bak" == "Y" ]]; then
+      mv "$HOME/.zshrc" "$HOME/.zshrc.cybersmith.bak"
+      touch "$HOME/.bashrc"
+      sed -i '/alias restore-thema=/d' "$HOME/.bashrc"
+      echo "$ALIAS_CMD" >> "$HOME/.bashrc"
+      echo -e "\e[1;32m[✔] Cadangan disimpan & 'restore-thema' aktif di mode Bash.\e[0m"
+    else
+      rm -f "$HOME/.zshrc" "$HOME/.zshrc.cybersmith.bak"
+      [ -f "$HOME/.bashrc" ] && sed -i '/alias restore-thema=/d' "$HOME/.bashrc"
+      echo -e "\e[1;31m[✔] Konfigurasi dihapus permanen.\e[0m"
+    fi
+  fi
+
   rm -f "$HOME/.termux/colors.properties" "$HOME/.termux/font.ttf" "$HOME/.termux/termux.properties" "$HOME/.hushlogin"
   chsh -s bash
   termux-reload-settings
