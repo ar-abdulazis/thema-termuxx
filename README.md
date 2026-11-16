@@ -34,8 +34,6 @@ Cukup salin dan jalankan perintah berikut di terminal Termux Anda:
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main/install.sh)"
 ```
 
-````
-
 _Skrip di atas akan secara otomatis memperbarui sistem, mendeteksi dan memasang dependensi (`git`, `curl`, `zsh`, `python`, `tar`, `fzf`, `gum`, `termux-api`), mengonfigurasi Oh My Zsh beserta pluginnya, mencadangkan file lama, hingga mengunduh konfigurasi tema Cybersmith terbaru._
 
 ### Metode Manual (Opsional)
@@ -139,4 +137,3 @@ Project **`thema-termuxx`** bersifat _Open Source_ di bawah semangat berbagi ilm
 Dibuat dengan ⚡ dan dedikasi penuh di ekosistem Termux Android.
 
 _Terima kasih telah berkunjung, semoga bermanfaat!_
-````
