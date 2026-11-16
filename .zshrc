@@ -32,27 +32,37 @@ cybersmith_header() {
   local C_GRAY='\e[1;90m'
   local C_RST='\e[0m'
 
-  # Informasi Sistem Real-Time
+  # Informasi Sistem Real-Time & Hardware
   local RT_TIME=$(date '+%H:%M:%S')
   local RT_DATE=$(date '+%d %b %Y')
-  local RT_STORAGE=$(df -h /data 2>/dev/null | awk 'NR==2 {print $4 "/" $2}')
+  local RT_STORAGE=$(df -h /data 2>/dev/null | awk 'NR==2 {print $4 "/" $2 " (" $5 ")"}')
+  local RT_UPTIME=$(uptime 2>/dev/null | sed 's/.*up \([^,]*\), .*/\1/')
   local RT_PY=$(python --version 2>/dev/null | awk '{print "Py " $2}')
   [ -z "$RT_PY" ] && RT_PY="No Py"
   local RT_ARCH=$(uname -m)
 
+  # Info Baterai & Suhu (Khusus Termux via termux-battery-status)
+  local RT_BATTERY="N/A"
+  if command -v termux-battery-status &> /dev/null; then
+    local b_pct=$(termux-battery-status 2>/dev/null | grep -o '"percentage":[0-9]*' | grep -o '[0-9]*')
+    local b_status=$(termux-battery-status 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+    [ -n "$b_pct" ] && RT_BATTERY="${b_pct}% (${b_status:-Unknown})"
+  fi
+
   echo -e "${C_MAG}╔════════════════════════════════════════════════════════╗${C_RST}"
-  echo -e "${C_CYAN}   ______      __               _____           _ __  __  ${C_RST}"
-  echo -e "${C_CYAN}  / ____/_  __/ /_  ___  _____ / ___/____ ___  (_) /_/ /_ ${C_RST}"
+  echo -e "${C_CYAN}   ______       __            _____           _ __  __  ${C_RST}"
+  echo -e "${C_CYAN}  / ____/_   __/ /_  ___  _____ / ___/____ ___  (_)/ /_/ /_ ${C_RST}"
   echo -e "${C_MAG} / /   / / / / __ \/ _ \/ ___/ \__ \/ __ \`__ \/ / __/ __ \\${C_RST}"
-  echo -e "${C_MAG}/ /___/ /_/ / /_/ /  __/ /    ___/ / / / / / / / /_/ / / /${C_RST}"
+  echo -e "${C_MAG}/ /___/ /_/ / /_/ /  __/ /    ___/ / / / / / / /_/ / / /${C_RST}"
   echo -e "${C_YEL}\____/\__, /_.___/\___/_/    /____/_/ /_/ /_/_/\__/_/ /_/ ${C_RST}"
-  echo -e "${C_YEL}     /____/                  ${C_GRAY}// NEURAL TERMINAL v2.6${C_RST}"
+  echo -e "${C_YEL}     /____/                      // NEURAL TERMINAL v2.6${C_RST}"
   echo -e "${C_MAG}╠════════════════════════════════════════════════════════╣${C_RST}"
   
   # Menggunakan printf agar garis kanan (║) selalu lurus & simetris
-  printf "${C_MAG}║${C_RST} ${C_CYAN}⚡ SYS :${C_RST} %-16s ${C_CYAN}🕒 TIME :${C_RST} ${C_YEL}%-16s${C_RST} ${C_MAG}║${C_RST}\n" "Termux ($ZSH_NAME)" "$RT_TIME"
-  printf "${C_MAG}║${C_RST} ${C_CYAN}💾 DISK:${C_RST} %-16s ${C_CYAN}📅 DATE :${C_RST} %-16s ${C_MAG}║${C_RST}\n" "$RT_STORAGE" "$RT_DATE"
-  printf "${C_MAG}║${C_RST} ${C_CYAN}🔧 ENV :${C_RST} ${C_GRN}%-16s${C_RST} ${C_CYAN}📡 NODE :${C_RST} %-16s ${C_MAG}║${C_RST}\n" "$RT_PY | Git" "$RT_ARCH"
+  printf "${C_MAG}║${C_RST} ${C_CYAN}⚡ SYS  :${C_RST} %-16s ${C_CYAN}🕒 TIME  :${C_RST} ${C_YEL}%-15s${C_RST} ${C_MAG}║${C_RST}\n" "Termux" "$RT_TIME"
+  printf "${C_MAG}║${C_RST} ${C_CYAN}💾 DISK :${C_RST} %-16s ${C_CYAN}📅 DATE  :${C_RST} %-15s ${C_MAG}║${C_RST}\n" "$RT_STORAGE" "$RT_DATE"
+  printf "${C_MAG}║${C_RST} ${C_CYAN}🔋 BATT :${C_RST} %-16s ${C_CYAN}⏱️ UPTIME:${C_RST} %-15s ${C_MAG}║${C_RST}\n" "$RT_BATTERY" "$RT_UPTIME"
+  printf "${C_MAG}║${C_RST} ${C_CYAN}🔧 ENV  :${C_RST} ${C_GRN}%-16s${C_RST} ${C_CYAN}📡 NODE  :${C_RST} %-15s ${C_MAG}║${C_RST}\n" "$RT_PY" "$RT_ARCH"
   
   echo -e "${C_MAG}╚════════════════════════════════════════════════════════╝${C_RST}"
   echo ""
@@ -147,27 +157,148 @@ alias reset-thema='exec bash -c "$(curl -fsSL https://raw.githubusercontent.com/
 
 
 # ==========================================
-# 5. CYBERSMITH - BACKUP & RESTORE CONFIG
+# 5. INTERACTIVE THEME SELECTOR (FZF & GUM)
 # ==========================================
 
-# Perintah untuk membuat backup lengkap ke folder Download HP
+themes() {
+  if ! command -v gum &> /dev/null; then
+    echo -e "\e[1;33m[!] 'gum' belum terpasang. Menginstal otomatis...\e[0m"
+    pkg install gum fzf -y
+  fi
+
+  local CHOICE=$(gum choose \
+    "⚡ Cybersmith Cyberfunk (Cyan & Magenta)" \
+    "🔋 Matrix Green (Classic Hacker)" \
+    "🔥 Amber Terminal (Retro Fallout Style)" \
+    "❄️ Cyber Blue Deep" \
+    "❌ Batalkan")
+
+  case "$CHOICE" in
+    *"Cyberfunk"*)
+      echo -e "\n\e[1;36m[+] Menerapkan Tema Cybersmith Cyberfunk...\e[0m"
+      cat << 'EOF' > ~/.termux/colors.properties
+background=#0f0e17
+foreground=#05d9e8
+cursor=#ff2a6d
+color0=#1b1a29
+color1=#ff2a6d
+color2=#00ff66
+color3=#ffb000
+color4=#05d9e8
+color5=#b57edd
+color6=#799fff
+color7=#fffffe
+color8=#7f7f8a
+color9=#ff5c8d
+color10=#33ff88
+color11=#ffc44d
+color12=#33e1ee
+color13=#cbb2ed
+color14=#9cbaff
+color15=#ffffff
+EOF
+      ;;
+    *"Matrix Green"*)
+      echo -e "\n\e[1;32m[+] Menerapkan Tema Matrix Green...\e[0m"
+      cat << 'EOF' > ~/.termux/colors.properties
+background=#0d0d0d
+foreground=#00ff66
+cursor=#00ff66
+color0=#1a1a1a
+color1=#ff0033
+color2=#00ff66
+color3=#ffb000
+color4=#0080ff
+color5=#cc00ff
+color6=#00ffff
+color7=#ffffff
+color8=#666666
+color9=#ff3366
+color10=#33ff88
+color11=#ffc44d
+color12=#3399ff
+color13=#e64dff
+color14=#80ffff
+color15=#ffffff
+EOF
+      ;;
+    *"Amber Terminal"*)
+      echo -e "\n\e[1;33m[+] Menerapkan Tema Amber Terminal...\e[0m"
+      cat << 'EOF' > ~/.termux/colors.properties
+background=#14120f
+foreground=#ffb000
+cursor=#ffb000
+color0=#26221c
+color1=#ff4500
+color2=#99cc00
+color3=#ffb000
+color4=#3366cc
+color5=#9933cc
+color6=#00cccc
+color7=#ffeedd
+color8=#665c54
+color9=#ff6633
+color10=#b3ff33
+color11=#ffc740
+color12=#5c85d6
+color13=#b366ff
+color14=#33cccc
+color15=#ffffff
+EOF
+      ;;
+    *"Cyber Blue Deep"*)
+      echo -e "\n\e[1;34m[+] Menerapkan Tema Cyber Blue Deep...\e[0m"
+      cat << 'EOF' > ~/.termux/colors.properties
+background=#0b1329
+foreground=#799fff
+cursor=#05d9e8
+color0=#121d3b
+color1=#ff2a6d
+color2=#00ffcc
+color3=#ffb000
+color4=#3366ff
+color5=#b57edd
+color6=#05d9e8
+color7=#ffffff
+color8=#4a5c8c
+color9=#ff5c8d
+color10=#33ffdd
+color11=#ffc44d
+color12=#668cff
+color13=#cbb2ed
+color14=#33e1ee
+color15=#ffffff
+EOF
+      ;;
+    *)
+      echo "Pemilihan tema dibatalkan."
+      return
+      ;;
+  esac
+
+  termux-reload-settings
+  echo -e "\n\e[1;32m[✔] Tema berhasil diterapkan! Menyegarkan sesi...\e[0m"
+  sleep 0.8
+  exec zsh
+}
+
+
+# ==========================================
+# 6. CYBERSMITH - BACKUP & RESTORE CONFIG
+# ==========================================
+
 backup-termux() {
   local BACKUP_DIR="/sdcard/Download/Termux_Backup"
   local ARCHIVE_NAME="cybersmith_config_$(date +%Y%m%d_%H%M%S).tar.gz"
 
   mkdir -p "$BACKUP_DIR"
-
-  # Simpan daftar paket pkg yang terinstal saat ini
   pkg list-installed > ~/.termux/installed_packages.txt 2>/dev/null
-
-  # Arsipkan file konfigurasi utama & folder .termux
   tar -czf "$BACKUP_DIR/$ARCHIVE_NAME" -C ~ .zshrc .termux .hushlogin 2>/dev/null
 
   echo -e "\e[1;32m[✔] Backup berhasil disimpan di:\e[0m"
-  echo -e "\e[1;36m    $BACKUP_DIR/$ARCHIVE_NAME\e[0m"
+  echo -e "\e[1;36m     $BACKUP_DIR/$ARCHIVE_NAME\e[0m"
 }
 
-# Perintah untuk memulihkan konfigurasi dari file backup terbaru
 restore-termux() {
   local BACKUP_DIR="/sdcard/Download/Termux_Backup"
   local LATEST_BACKUP=$(ls -t "$BACKUP_DIR"/cybersmith_config_*.tar.gz 2>/dev/null | head -n 1)
@@ -183,7 +314,7 @@ restore-termux() {
   source ~/.zshrc
   echo -e "\e[1;32m[✔] Konfigurasi Cybersmith berhasil dipulihkan!\e[0m"
 }
-# Perintah untuk mereset tampilan Termux kembali ke bawaan pabrik (Bash)
+
 reset-termux() {
   echo -e "\e[1;33m[!] Mengembalikan Termux ke tampilan awal...\e[0m"
   [ -f "$HOME/.zshrc" ] && mv "$HOME/.zshrc" "$HOME/.zshrc.cybersmith.bak"
