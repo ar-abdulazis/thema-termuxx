@@ -1,12 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# Warna Output
 CYAN='\033[1;36m'
 MAG='\033[1;35m'
 GRN='\033[1;32m'
 YEL='\033[1;33m'
 RED='\033[1;31m'
 NC='\033[0m'
+
+REPO_RAW="https://raw.githubusercontent.com/ar-abdulazis/thema-termuxx/main"
 
 echo -e "${MAG}╔══════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}   ⚡ INSTALLER THEMA-TERMUXx (CYBERSMITH EDITION) ⚡   ${NC}"
@@ -17,7 +18,7 @@ echo -e "\n${YEL}[1/6] Memperbarui sistem & menginstal paket dasar...${NC}"
 pkg update -y && pkg upgrade -y
 pkg install -y git curl zsh nano python tar
 
-# 2. Setup Izin Storage (Lewati jika sudah aktif)
+# 2. Setup Izin Storage
 if [ ! -d "$HOME/storage" ]; then
   echo -e "\n${YEL}[2/6] Meminta izin akses penyimpanan HP...${NC}"
   termux-setup-storage
@@ -46,29 +47,18 @@ if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
   git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 fi
 
-# 5. Unduh & Ekstrak Thema-Termuxx
-echo -e "\n${YEL}[5/6] Mengunduh & mengekstrak konfigurasi Cybersmith...${NC}"
-TEMP_DIR="$HOME/.temp_thema_termuxx"
-rm -rf "$TEMP_DIR"
-git clone https://github.com/ar-abdulazis/thema-termuxx.git "$TEMP_DIR"
-
-# Backup konfigurasi lama untuk keamanan
+# 5. Unduh Konfigurasi Terbaru Langsung dari Repositori GitHub
+echo -e "\n${YEL}[5/6] Mengunduh konfigurasi terbaru Cybersmith...${NC}"
 [ -f "$HOME/.zshrc" ] && cp "$HOME/.zshrc" "$HOME/.zshrc.bak_$(date +%Y%m%d)"
+mkdir -p "$HOME/.termux"
 
-# Cari file .tar.gz di dalam repo (mendukung nama file arsip apapun di repo)
-ARCHIVE_FILE=$(find "$TEMP_DIR" -maxdepth 1 -name "*.tar.gz" | head -n 1)
+# Mengambil file lepas langsung (tidak bergantung pada arsip .tar.gz)
+curl -fsSL "$REPO_RAW/.zshrc" -o "$HOME/.zshrc"
+curl -fsSL "$REPO_RAW/colors.properties" -o "$HOME/.termux/colors.properties"
+curl -fsSL "$REPO_RAW/termux.properties" -o "$HOME/.termux/termux.properties"
+curl -fsSL "$REPO_RAW/font.ttf" -o "$HOME/.termux/font.ttf"
 
-if [ -n "$ARCHIVE_FILE" ]; then
-  tar -xzf "$ARCHIVE_FILE" -C "$HOME"
-  echo -e "${GRN}[✔] File konfigurasi berhasil diekstrak dari $(basename "$ARCHIVE_FILE")!${NC}"
-else
-  echo -e "${RED}[✘] File arsip .tar.gz tidak ditemukan di repositori!${NC}"
-  rm -rf "$TEMP_DIR"
-  exit 1
-fi
-
-# Bersihkan folder sementara
-rm -rf "$TEMP_DIR"
+echo -e "${GRN}[✔] Berkas konfigurasi berhasil diunduh dan diterapkan!${NC}"
 
 # 6. Ubah Default Shell ke Zsh & Terapkan Pengaturan
 echo -e "\n${YEL}[6/6] Menerapkan pengaturan akhir...${NC}"
